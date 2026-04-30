@@ -1,5 +1,2 @@
 discord.py
-flask
-flask-socketio
-eventlet
 python-dotenv
