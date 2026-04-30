@@ -3,6 +3,8 @@ from discord.ext import commands
 import json
 import os
 from dotenv import load_dotenv
+import threading
+from dashboard import run_dashboard, push_log
 
 load_dotenv()
 
@@ -64,6 +66,15 @@ logs_data = load_logs()
 async def send_log(guild, log_type, message):
     guild_logs = logs_data.get(str(guild.id), {})
     channel_id = guild_logs.get(log_type)
+
+    log_data = {
+        "type": log_type,
+        "message": message,
+        "guild": guild.name
+    }
+
+    push_log(log_data)  # 🔥 envoi vers dashboard temps réel
+
     if channel_id:
         channel = guild.get_channel(int(channel_id))
         if channel:
@@ -255,4 +266,6 @@ async def help(ctx):
     )
     await ctx.send(embed=embed, view=HelpView())
 
+
+threading.Thread(target=run_dashboard, daemon=True).start()
 bot.run(os.getenv("DISCORD_TOKEN"))
